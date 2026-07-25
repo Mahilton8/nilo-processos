@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acompanhamento de Atividades — Rede Nilo</title>
+<style>
+:root{
+  --amarelo-limao:#FCFC0A;
+  --amarelo-ouro:#F9E109;
+  --vermelho:#A61309;
+  --vinho:#910702;
+  --azul-royal:#0C2E84;
+  --azul-marinho:#072772;
+  --grafite:#333333;
+  --off-white:#F7F7F5;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:var(--off-white);
+  color:var(--grafite);
+  padding:20px;
+}
+.container{max-width:960px;margin:0 auto;}
+header{
+  background:linear-gradient(135deg,var(--azul-marinho),var(--azul-royal));
+  color:#fff;
+  padding:24px 28px;
+  border-radius:10px;
+  margin-bottom:20px;
+  border-left:6px solid var(--amarelo-limao);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;
+}
+header h1{font-size:1.5rem;margin-bottom:4px;}
+header p{opacity:0.85;font-size:0.9rem;}
+
+.sync-status{font-size:0.75rem;padding:5px 10px;border-radius:20px;background:rgba(255,255,255,0.12);white-space:nowrap;}
+.sync-status.ok{background:rgba(255,255,255,0.18);}
+
+.toolbar{
+  display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;
+}
+button{
+  cursor:pointer;border:none;border-radius:6px;padding:10px 16px;
+  font-weight:600;font-size:0.85rem;transition:0.15s;
+}
+.btn-primary{background:var(--amarelo-limao);color:var(--azul-marinho);}
+.btn-primary:hover{background:var(--amarelo-ouro);}
+.btn-secondary{background:#fff;color:var(--azul-marinho);border:1px solid #ddd;}
+.btn-secondary:hover{background:#eee;}
+.btn-danger{background:transparent;color:var(--vermelho);border:1px solid var(--vermelho);padding:6px 10px;font-size:0.75rem;}
+.btn-danger:hover{background:var(--vermelho);color:#fff;}
+.btn-sub{background:var(--azul-royal);color:#fff;padding:6px 12px;font-size:0.75rem;}
+.btn-sub:hover{background:var(--azul-marinho);}
+
+.config-panel{
+  background:#fff;border:1px dashed #ccc;border-radius:8px;padding:14px 16px;margin-bottom:20px;
+  font-size:0.8rem;display:none;
+}
+.config-panel.open{display:block;}
+.config-panel label{display:block;margin-bottom:6px;font-weight:600;color:var(--azul-marinho);}
+.config-panel input{width:100%;padding:8px;border:1px solid #ddd;border-radius:5px;font-size:0.8rem;margin-bottom:8px;}
+
+.objective{
+  background:#fff;border-radius:10px;padding:20px;margin-bottom:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);border-top:4px solid var(--amarelo-limao);
+}
+.obj-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.obj-title{font-size:1.1rem;font-weight:700;color:var(--azul-marinho);flex:1;}
+.obj-title input{border:none;background:transparent;font-size:1.1rem;font-weight:700;color:var(--azul-marinho);width:100%;}
+.obj-title input:focus{outline:1px dashed var(--azul-royal);}
+.obj-meta{font-size:0.75rem;color:#888;margin-bottom:12px;}
+
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.progress-bar-bg{flex:1;height:14px;background:#eee;border-radius:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--amarelo-ouro),var(--amarelo-limao));transition:width 0.3s;}
+.progress-pct{font-weight:700;color:var(--azul-marinho);min-width:44px;text-align:right;font-size:0.9rem;}
+
+.subactivities{border-top:1px solid #f0f0f0;padding-top:10px;}
+.sub-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+.sub-item input[type="text"]{
+  flex:1;border:1px solid #e2e2e2;border-radius:5px;padding:6px 8px;font-size:0.85rem;
+}
+.sub-item input[type="range"]{width:110px;accent-color:var(--azul-royal);}
+.sub-pct{font-size:0.8rem;font-weight:600;color:var(--azul-royal);min-width:38px;text-align:right;}
+.sub-status{font-size:1.1rem;min-width:20px;text-align:center;}
+
+.add-row{margin-top:10px;}
+
+.badge{
+  display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.7rem;font-weight:700;
+}
+.badge-ok{background:#e4f5e0;color:#2c7a1f;}
+.badge-mid{background:#fff4d1;color:#8a6a00;}
+.badge-low{background:#fde3e1;color:var(--vermelho);}
+
+.empty{text-align:center;color:#999;padding:40px 0;font-size:0.9rem;}
+footer{text-align:center;font-size:0.75rem;color:#999;margin-top:24px;padding-top:14px;border-top:1px solid #e5e5e5;}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>📋 Acompanhamento de Atividades</h1>
+      <p>Rede Nilo Supermercados — Gestão de Projetos e Processos</p>
+    </div>
+    <div id="syncStatus" class="sync-status" style="display:none;">🔄 Sincronização não configurada</div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn-primary" onclick="addObjective()">+ Novo Objetivo</button>
+  </div>
+
+  <div class="config-panel" id="configPanel" style="display:none;">
+    <label>URL do Web App (Google Apps Script)</label>
+    <input type="text" id="webhookInput" placeholder="https://script.google.com/macros/s/XXXX/exec">
+    <button class="btn-primary" onclick="saveWebhook()">Salvar e Sincronizar</button>
+  </div>
+
+  <div id="objectives"></div>
+  <div id="emptyState" class="empty" style="display:none;">Nenhuma atividade cadastrada. Clique em "+ Novo Objetivo" para começar.</div>
+
+  <footer>Progresso da subatividade é definido manualmente; o progresso do objetivo é a média das subatividades.</footer>
+</div>
+
+<script>
+let data = { objectives: [] };
+const LOCAL_KEY = 'nilo_atividades_dados';
+const WEBHOOK_KEY = 'nilo_atividades_webhook';
+let webhookUrl = localStorage.getItem(WEBHOOK_KEY) || 'https://script.google.com/macros/s/AKfycbx1L4JrNs8LFqrkNV6vukAjIFZrJVtgTicdUKqxFfH5OdITbwNAGWLm3BMZsLY1EhsW7w/exec';
+
+function uid(){ return 'id' + Math.random().toString(36).slice(2,10); }
+
+function toggleConfig(){
+  const panel = document.getElementById('configPanel');
+  panel.classList.toggle('open');
+  if(webhookUrl) document.getElementById('webhookInput').value = webhookUrl;
+}
+
+function saveWebhook(){
+  webhookUrl = document.getElementById('webhookInput').value.trim();
+  localStorage.setItem(WEBHOOK_KEY, webhookUrl);
+  document.getElementById('configPanel').classList.remove('open');
+  if(webhookUrl){ carregarDoSheets(); }
+}
+
+function setSyncStatus(state){
+  const el = document.getElementById('syncStatus');
+  if(state === 'ok'){ el.textContent = '✅ Sincronizado com Google Sheets'; el.classList.add('ok'); }
+  else if(state === 'syncing'){ el.textContent = '🔄 Sincronizando...'; el.classList.remove('ok'); }
+  else if(state === 'off'){ el.textContent = '📴 Sincronização não configurada'; el.classList.remove('ok'); }
+  else if(state === 'error'){ el.textContent = '⚠️ Falha ao sincronizar (dados salvos localmente)'; el.classList.remove('ok'); }
+}
+
+// ---------- Persistência local (sempre ativa, funciona offline) ----------
+function saveLocal(){
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+}
+
+function loadLocal(){
+  const raw = localStorage.getItem(LOCAL_KEY);
+  if(raw){ try{ data = JSON.parse(raw); }catch(e){ data = { objectives: [] }; } }
+}
+
+// ---------- Sincronização com Google Sheets (Apps Script) ----------
+async function carregarDoSheets(){
+  if(!webhookUrl) { setSyncStatus('off'); return; }
+  setSyncStatus('syncing');
+  try{
+    const res = await fetch(webhookUrl);
+    const remote = await res.json();
+    if(remote && remote.objectives){
+      data = remote;
+      saveLocal();
+    }
+    setSyncStatus('ok');
+    render();
+  }catch(e){
+    console.error('Erro ao carregar do Sheets', e);
+    setSyncStatus('error');
+  }
+}
+
+async function sincronizar(){
+  saveLocal();
+  render();
+  if(!webhookUrl) { setSyncStatus('off'); return; }
+  setSyncStatus('syncing');
+  try{
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(data)
+    });
+    setSyncStatus('ok');
+  }catch(e){
+    console.error('Erro ao sincronizar com Sheets', e);
+    setSyncStatus('error');
+  }
+}
+
+function addObjective(){
+  data.objectives.push({ id: uid(), title: 'Novo objetivo', sub: [] });
+  sincronizar();
+}
+
+function removeObjective(id){
+  data.objectives = data.objectives.filter(o => o.id !== id);
+  sincronizar();
+}
+
+function addSub(objId){
+  const obj = data.objectives.find(o => o.id === objId);
+  obj.sub.push({ id: uid(), title: 'Nova subatividade', pct: 0 });
+  sincronizar();
+}
+
+function removeSub(objId, subId){
+  const obj = data.objectives.find(o => o.id === objId);
+  obj.sub = obj.sub.filter(s => s.id !== subId);
+  sincronizar();
+}
+
+function updateObjTitle(objId, val){
+  const obj = data.objectives.find(o => o.id === objId);
+  obj.title = val; sincronizar();
+}
+
+function updateSubTitle(objId, subId, val){
+  const obj = data.objectives.find(o => o.id === objId);
+  const s = obj.sub.find(s => s.id === subId);
+  s.title = val; sincronizar();
+}
+
+function updateSubPct(objId, subId, val){
+  const obj = data.objectives.find(o => o.id === objId);
+  const s = obj.sub.find(s => s.id === subId);
+  s.pct = Number(val);
+  sincronizar();
+}
+
+function objProgress(obj){
+  if(obj.sub.length === 0) return 0;
+  const sum = obj.sub.reduce((a,s) => a + s.pct, 0);
+  return Math.round(sum / obj.sub.length);
+}
+
+function statusIcon(pct){
+  if(pct >= 100) return '✅';
+  if(pct >= 50) return '🟡';
+  if(pct > 0) return '🔵';
+  return '⚪';
+}
+
+function badgeClass(pct){
+  if(pct >= 80) return 'badge-ok';
+  if(pct >= 40) return 'badge-mid';
+  return 'badge-low';
+}
+
+function render(){
+  const container = document.getElementById('objectives');
+  const empty = document.getElementById('emptyState');
+  container.innerHTML = '';
+
+  if(data.objectives.length === 0){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  data.objectives.forEach(obj => {
+    const pct = objProgress(obj);
+    const div = document.createElement('div');
+    div.className = 'objective';
+    div.innerHTML = `
+      <div class="obj-header">
+        <div class="obj-title">
+          <input type="text" value="${escapeHtml(obj.title)}" onchange="updateObjTitle('${obj.id}', this.value)">
+        </div>
+        <button class="btn-danger" onclick="removeObjective('${obj.id}')">Excluir</button>
+      </div>
+      <div class="obj-meta">${obj.sub.length} subatividade(s) &nbsp;•&nbsp; <span class="badge ${badgeClass(pct)}">${pct}% concluído</span></div>
+      <div class="progress-row">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div class="progress-pct">${pct}%</div>
+      </div>
+      <div class="subactivities" id="sub-${obj.id}"></div>
+      <div class="add-row"><button class="btn-sub" onclick="addSub('${obj.id}')">+ Subatividade</button></div>
+    `;
+    container.appendChild(div);
+
+    const subContainer = div.querySelector(`#sub-${obj.id}`);
+    obj.sub.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'sub-item';
+      row.innerHTML = `
+        <span class="sub-status">${statusIcon(s.pct)}</span>
+        <input type="text" value="${escapeHtml(s.title)}" onchange="updateSubTitle('${obj.id}','${s.id}', this.value)">
+        <input type="range" min="0" max="100" step="5" value="${s.pct}" oninput="this.nextElementSibling.textContent=this.value+'%'" onchange="updateSubPct('${obj.id}','${s.id}', this.value)">
+        <span class="sub-pct">${s.pct}%</span>
+        <button class="btn-danger" onclick="removeSub('${obj.id}','${s.id}')">✕</button>
+      `;
+      subContainer.appendChild(row);
+    });
+  });
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// Inicialização: carrega o que tiver salvo localmente primeiro (uso imediato),
+// depois busca a versão mais recente do Sheets, se configurado.
+loadLocal();
+render();
+if(webhookUrl){ carregarDoSheets(); } else { setSyncStatus('off'); }
+</script>
+</body>
+</html>
