@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acompanhamento de Projetos — Rede Nilo</title>
+<style>
+:root{
+  --amarelo-limao:#FCFC0A;
+  --amarelo-ouro:#F9E109;
+  --vermelho:#A61309;
+  --vinho:#910702;
+  --azul-royal:#0C2E84;
+  --azul-marinho:#072772;
+  --grafite:#333333;
+  --off-white:#F7F7F5;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Segoe UI',Arial,sans-serif;
+  background:var(--off-white);
+  color:var(--grafite);
+  padding:20px;
+}
+.container{max-width:1000px;margin:0 auto;}
+header{
+  background:linear-gradient(135deg,var(--azul-marinho),var(--azul-royal));
+  color:#fff;
+  padding:24px 28px;
+  border-radius:10px;
+  margin-bottom:20px;
+  border-left:6px solid var(--amarelo-limao);
+}
+header h1{font-size:1.5rem;margin-bottom:4px;}
+header p{opacity:0.85;font-size:0.9rem;}
+
+.toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+button{cursor:pointer;border:none;border-radius:6px;padding:10px 16px;font-weight:600;font-size:0.85rem;transition:0.15s;}
+.btn-primary{background:var(--amarelo-limao);color:var(--azul-marinho);}
+.btn-primary:hover{background:var(--amarelo-ouro);}
+.btn-danger{background:transparent;color:var(--vermelho);border:1px solid var(--vermelho);padding:6px 10px;font-size:0.72rem;}
+.btn-danger:hover{background:var(--vermelho);color:#fff;}
+.btn-activity{background:var(--azul-royal);color:#fff;padding:7px 14px;font-size:0.78rem;}
+.btn-activity:hover{background:var(--azul-marinho);}
+.btn-task{background:#fff;color:var(--azul-royal);border:1px solid var(--azul-royal);padding:5px 10px;font-size:0.72rem;}
+.btn-task:hover{background:#eef1fa;}
+.btn-move{background:#f0f0f0;color:var(--azul-marinho);border:1px solid #e0e0e0;padding:1px 6px;font-size:0.62rem;line-height:1.3;border-radius:3px;}
+.btn-move:hover:not(:disabled){background:var(--amarelo-limao);}
+.btn-move:disabled{opacity:0.3;cursor:default;}
+.reorder{display:flex;flex-direction:column;gap:2px;}
+
+/* PROJETO */
+.project{
+  background:#fff;border-radius:10px;padding:20px;margin-bottom:18px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);border-top:4px solid var(--amarelo-limao);
+}
+.project-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.project-title input{border:none;background:transparent;font-size:1.25rem;font-weight:800;color:var(--azul-marinho);width:100%;}
+.project-title input:focus{outline:1px dashed var(--azul-royal);}
+.project-meta{font-size:0.75rem;color:#888;margin-bottom:10px;}
+
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.progress-bar-bg{flex:1;height:14px;background:#eee;border-radius:7px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--amarelo-ouro),var(--amarelo-limao));transition:width 0.3s;}
+.progress-bar-fill.mid{background:var(--azul-royal);}
+.progress-pct{font-weight:700;color:var(--azul-marinho);min-width:44px;text-align:right;font-size:0.9rem;}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:0.68rem;font-weight:700;}
+.badge-ok{background:#e4f5e0;color:#2c7a1f;}
+.badge-mid{background:#fff4d1;color:#8a6a00;}
+.badge-low{background:#fde3e1;color:var(--vermelho);}
+
+/* ATIVIDADE */
+.activities{border-top:1px solid #f0f0f0;padding-top:12px;margin-top:6px;}
+.activity{
+  background:var(--off-white);border-radius:8px;padding:14px 16px;margin-bottom:10px;
+  border-left:3px solid var(--azul-royal);
+}
+.activity-header{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.activity-header input[type="text"]{
+  flex:1;border:1px solid #e2e2e2;border-radius:5px;padding:6px 9px;font-size:0.92rem;font-weight:600;color:var(--azul-marinho);background:#fff;
+}
+.activity-pct-inline{font-size:0.78rem;font-weight:700;color:var(--azul-royal);min-width:38px;text-align:right;}
+
+/* TAREFA */
+.tasks{margin-top:8px;padding-left:6px;}
+.task-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee;}
+.task-item input[type="text"]{flex:1;border:1px solid #e2e2e2;border-radius:5px;padding:5px 8px;font-size:0.82rem;background:#fff;}
+.task-item input[type="range"]{width:100px;accent-color:var(--azul-royal);}
+.task-pct{font-size:0.76rem;font-weight:600;color:var(--azul-royal);min-width:34px;text-align:right;}
+.task-status{font-size:1rem;min-width:18px;text-align:center;}
+
+.add-row{margin-top:8px;display:flex;gap:8px;}
+
+.empty{text-align:center;color:#999;padding:40px 0;font-size:0.9rem;}
+footer{text-align:center;font-size:0.75rem;color:#999;margin-top:24px;padding-top:14px;border-top:1px solid #e5e5e5;}
+
+/* RESPONSIVO — CELULAR */
+@media (max-width: 600px){
+  body{padding:12px;}
+  header{padding:18px 16px;}
+  header h1{font-size:1.2rem;}
+  header p{font-size:0.8rem;}
+
+  .toolbar button{width:100%;}
+
+  .project{padding:14px;}
+  .project-header{flex-direction:column;align-items:stretch;}
+  .project-header .btn-danger{width:100%;}
+  .project-title input{font-size:1.05rem;}
+
+  .activity{padding:12px;}
+  .activity-header{flex-wrap:wrap;}
+  .activity-header input[type="text"]{min-width:100%;order:1;}
+  .reorder{order:0;}
+  .activity-pct-inline{order:2;}
+  .activity-header .btn-danger{order:3;margin-left:auto;}
+
+  .task-item{flex-wrap:wrap;row-gap:6px;}
+  .task-item input[type="text"]{min-width:100%;order:1;}
+  .task-item input[type="range"]{flex:1;width:auto;order:2;}
+  .task-pct{order:3;}
+  .task-status{order:0;}
+  .reorder{order:0;}
+  .task-item .btn-danger{order:4;margin-left:auto;}
+
+  .add-row button{width:100%;}
+  .add-row{flex-direction:column;}
+
+  .btn-move{padding:4px 9px;font-size:0.8rem;}
+  .btn-danger{padding:8px 12px;font-size:0.8rem;}
+  .task-status{font-size:1.1rem;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📋 Acompanhamento de Projetos</h1>
+    <p>Rede Nilo Supermercados — Gestão de Projetos e Processos</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn-primary" onclick="addProject()">+ Novo Projeto</button>
+  </div>
+
+  <div id="projects"></div>
+  <div id="emptyState" class="empty" style="display:none;">Nenhum projeto cadastrado. Clique em "+ Novo Projeto" para começar.</div>
+
+  <footer>% da tarefa é definido manualmente. % da atividade = média das tarefas. % do projeto = média das atividades.</footer>
+</div>
+
+<script>
+/* Estrutura de dados:
+   data.projects = [
+     { id, title, activities: [
+         { id, title, tasks: [ {id, title, pct} ] }
+     ]}
+   ]
+*/
+let data = { projects: [] };
+const LOCAL_KEY = 'nilo_projetos_dados';
+const WEBHOOK_KEY = 'nilo_atividades_webhook';
+let webhookUrl = localStorage.getItem(WEBHOOK_KEY) || 'https://script.google.com/macros/s/AKfycbx1L4JrNs8LFqrkNV6vukAjIFZrJVtgTicdUKqxFfH5OdITbwNAGWLm3BMZsLY1EhsW7w/exec';
+
+function uid(){ return 'id' + Math.random().toString(36).slice(2,10); }
+
+function saveLocal(){ localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); }
+function loadLocal(){
+  const raw = localStorage.getItem(LOCAL_KEY);
+  if(raw){ try{ data = JSON.parse(raw); }catch(e){ data = { projects: [] }; } }
+}
+
+async function carregarDoSheets(){
+  if(!webhookUrl) return;
+  try{
+    const res = await fetch(webhookUrl);
+    const remote = await res.json();
+    if(remote && remote.projects){ data = remote; saveLocal(); render(); }
+  }catch(e){ console.error('Erro ao carregar do Sheets', e); }
+}
+
+async function sincronizar(){
+  saveLocal();
+  render();
+  if(!webhookUrl) return;
+  try{
+    await fetch(webhookUrl, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(data)
+    });
+  }catch(e){ console.error('Erro ao sincronizar com Sheets', e); }
+}
+
+// ---------- Projeto ----------
+function addProject(){
+  data.projects.push({ id: uid(), title: 'Novo projeto', activities: [] });
+  sincronizar();
+}
+function removeProject(id){
+  data.projects = data.projects.filter(p => p.id !== id);
+  sincronizar();
+}
+function updateProjectTitle(pid, val){
+  const proj = data.projects.find(p => p.id === pid);
+  proj.title = val; sincronizar();
+}
+
+// ---------- Atividade ----------
+function addActivity(pid){
+  const proj = data.projects.find(p => p.id === pid);
+  proj.activities.push({ id: uid(), title: 'Nova atividade', tasks: [] });
+  sincronizar();
+}
+function removeActivity(pid, aid){
+  const proj = data.projects.find(p => p.id === pid);
+  proj.activities = proj.activities.filter(a => a.id !== aid);
+  sincronizar();
+}
+function updateActivityTitle(pid, aid, val){
+  const proj = data.projects.find(p => p.id === pid);
+  const act = proj.activities.find(a => a.id === aid);
+  act.title = val; sincronizar();
+}
+function moveActivity(pid, aid, dir){
+  const proj = data.projects.find(p => p.id === pid);
+  const idx = proj.activities.findIndex(a => a.id === aid);
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= proj.activities.length) return;
+  [proj.activities[idx], proj.activities[newIdx]] = [proj.activities[newIdx], proj.activities[idx]];
+  sincronizar();
+}
+
+// ---------- Tarefa ----------
+function addTask(pid, aid){
+  const proj = data.projects.find(p => p.id === pid);
+  const act = proj.activities.find(a => a.id === aid);
+  act.tasks.push({ id: uid(), title: 'Nova tarefa', pct: 0 });
+  sincronizar();
+}
+function removeTask(pid, aid, tid){
+  const proj = data.projects.find(p => p.id === pid);
+  const act = proj.activities.find(a => a.id === aid);
+  act.tasks = act.tasks.filter(t => t.id !== tid);
+  sincronizar();
+}
+function updateTaskTitle(pid, aid, tid, val){
+  const proj = data.projects.find(p => p.id === pid);
+  const act = proj.activities.find(a => a.id === aid);
+  const task = act.tasks.find(t => t.id === tid);
+  task.title = val; sincronizar();
+}
+function updateTaskPct(pid, aid, tid, val){
+  const proj = data.projects.find(p => p.id === pid);
+  const act = proj.activities.find(a => a.id === aid);
+  const task = act.tasks.find(t => t.id === tid);
+  task.pct = Number(val); sincronizar();
+}
+function moveTask(pid, aid, tid, dir){
+  const proj = data.projects.find(p => p.id === pid);
+  const act = proj.activities.find(a => a.id === aid);
+  const idx = act.tasks.findIndex(t => t.id === tid);
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= act.tasks.length) return;
+  [act.tasks[idx], act.tasks[newIdx]] = [act.tasks[newIdx], act.tasks[idx]];
+  sincronizar();
+}
+
+// ---------- Cálculo de progresso ----------
+function activityProgress(act){
+  if(act.tasks.length === 0) return 0;
+  return Math.round(act.tasks.reduce((a,t) => a + t.pct, 0) / act.tasks.length);
+}
+function projectProgress(proj){
+  if(proj.activities.length === 0) return 0;
+  return Math.round(proj.activities.reduce((a,act) => a + activityProgress(act), 0) / proj.activities.length);
+}
+function statusIcon(pct){
+  if(pct >= 100) return '✅';
+  if(pct >= 50) return '🟡';
+  if(pct > 0) return '🔵';
+  return '⚪';
+}
+function badgeClass(pct){
+  if(pct >= 80) return 'badge-ok';
+  if(pct >= 40) return 'badge-mid';
+  return 'badge-low';
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---------- Render ----------
+function render(){
+  const container = document.getElementById('projects');
+  const empty = document.getElementById('emptyState');
+  container.innerHTML = '';
+
+  if(data.projects.length === 0){ empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  data.projects.forEach(proj => {
+    const ppct = projectProgress(proj);
+    const div = document.createElement('div');
+    div.className = 'project';
+    div.innerHTML = `
+      <div class="project-header">
+        <div class="project-title" style="flex:1;">
+          <input type="text" value="${escapeHtml(proj.title)}" onchange="updateProjectTitle('${proj.id}', this.value)">
+        </div>
+        <button class="btn-danger" onclick="removeProject('${proj.id}')">Excluir projeto</button>
+      </div>
+      <div class="project-meta">${proj.activities.length} atividade(s) &nbsp;•&nbsp; <span class="badge ${badgeClass(ppct)}">${ppct}% concluído</span></div>
+      <div class="progress-row">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${ppct}%"></div></div>
+        <div class="progress-pct">${ppct}%</div>
+      </div>
+      <div class="activities" id="acts-${proj.id}"></div>
+      <div class="add-row"><button class="btn-activity" onclick="addActivity('${proj.id}')">+ Atividade</button></div>
+    `;
+    container.appendChild(div);
+
+    const actsContainer = div.querySelector(`#acts-${proj.id}`);
+    proj.activities.forEach((act, aidx) => {
+      const apct = activityProgress(act);
+      const actDiv = document.createElement('div');
+      actDiv.className = 'activity';
+      actDiv.innerHTML = `
+        <div class="activity-header">
+          <div class="reorder">
+            <button class="btn-move" ${aidx===0?'disabled':''} onclick="moveActivity('${proj.id}','${act.id}',-1)" title="Mover para cima">▲</button>
+            <button class="btn-move" ${aidx===proj.activities.length-1?'disabled':''} onclick="moveActivity('${proj.id}','${act.id}',1)" title="Mover para baixo">▼</button>
+          </div>
+          <input type="text" value="${escapeHtml(act.title)}" onchange="updateActivityTitle('${proj.id}','${act.id}', this.value)">
+          <span class="activity-pct-inline">${apct}%</span>
+          <button class="btn-danger" onclick="removeActivity('${proj.id}','${act.id}')">✕</button>
+        </div>
+        <div class="progress-row" style="margin-bottom:8px;">
+          <div class="progress-bar-bg"><div class="progress-bar-fill mid" style="width:${apct}%"></div></div>
+        </div>
+        <div class="tasks" id="tasks-${act.id}"></div>
+        <div class="add-row"><button class="btn-task" onclick="addTask('${proj.id}','${act.id}')">+ Tarefa</button></div>
+      `;
+      actsContainer.appendChild(actDiv);
+
+      const tasksContainer = actDiv.querySelector(`#tasks-${act.id}`);
+      act.tasks.forEach((task, tidx) => {
+        const row = document.createElement('div');
+        row.className = 'task-item';
+        row.innerHTML = `
+          <span class="task-status">${statusIcon(task.pct)}</span>
+          <div class="reorder">
+            <button class="btn-move" ${tidx===0?'disabled':''} onclick="moveTask('${proj.id}','${act.id}','${task.id}',-1)" title="Mover para cima">▲</button>
+            <button class="btn-move" ${tidx===act.tasks.length-1?'disabled':''} onclick="moveTask('${proj.id}','${act.id}','${task.id}',1)" title="Mover para baixo">▼</button>
+          </div>
+          <input type="text" value="${escapeHtml(task.title)}" onchange="updateTaskTitle('${proj.id}','${act.id}','${task.id}', this.value)">
+          <input type="range" min="0" max="100" step="5" value="${task.pct}" oninput="this.nextElementSibling.textContent=this.value+'%'" onchange="updateTaskPct('${proj.id}','${act.id}','${task.id}', this.value)">
+          <span class="task-pct">${task.pct}%</span>
+          <button class="btn-danger" onclick="removeTask('${proj.id}','${act.id}','${task.id}')">✕</button>
+        `;
+        tasksContainer.appendChild(row);
+      });
+    });
+  });
+}
+
+loadLocal();
+render();
+if(webhookUrl){ carregarDoSheets(); }
+</script>
+</body>
+</html>
